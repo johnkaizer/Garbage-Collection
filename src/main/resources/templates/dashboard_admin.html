@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Garbage Collection</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <script src="/static/jquery.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="#" data-page="admin_overview.html" class="selected">Overview</a></li>
+            <li><a href="#" data-page="admin_users.html">Manage Users</a></li>
+            <li><a href="#" data-page="admin_reports.html">Reports</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="content-area"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Load the default page on load
+        $('#content-area').load('/fragments/admin_overview.html');
+
+        $('.sidebar a').click(function (event) {
+            event.preventDefault();
+            $('.sidebar a').removeClass('selected');
+            $(this).addClass('selected');
+            const page = $(this).data('page');
+            $('#content-area').load('/fragments/' + page);
+        });
+    });
+</script>
+</body>
+</html>

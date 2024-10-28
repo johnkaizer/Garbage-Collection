@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Dashboard - Garbage Collection</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <script src="/static/jquery.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="sidebar">
+        <h2>Driver Panel</h2>
+        <ul>
+            <li><a href="#" data-page="driver_route.html" class="selected">Assigned Route</a></li>
+            <li><a href="#" data-page="driver_schedule.html">Schedule</a></li>
+            <li><a href="#" data-page="driver_log.html">Log Collection</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="content-area"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Load the default page on load
+        $('#content-area').load('/fragments/driver_route.html');
+
+        $('.sidebar a').click(function (event) {
+            event.preventDefault();
+            $('.sidebar a').removeClass('selected');
+            $(this).addClass('selected');
+            const page = $(this).data('page');
+            $('#content-area').load('/fragments/' + page);
+        });
+    });
+</script>
+</body>
+</html>
