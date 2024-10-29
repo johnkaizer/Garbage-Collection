@@ -46,4 +46,11 @@ public class UserService {
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
     }
+    public Optional<User> authenticate(String email, String password) {
+        return userRepository.findByEmailAndPassword(email, password);
+    }
+    // Method to find a user by email
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 }

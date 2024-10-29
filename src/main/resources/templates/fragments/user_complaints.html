@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Complaints</title>
+    <link rel="stylesheet" href="/static/complaints.css">
+</head>
+<body>
+<div class="complaint-container">
+    <h2>Submit a Complaint</h2>
+    <form id="complaintForm">
+        <div class="form-group">
+            <label for="route">Select Route:</label>
+            <select id="route" name="route" required>
+                <!-- Options populated dynamically -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" id="submitComplaintButton">Submit Complaint</button>
+        </div>
+    </form>
+
+    <div id="message" class="message"></div>
+</div>
+
+<div class="complaint-history-container">
+    <h2>Complaint History</h2>
+    <table id="complaintHistoryTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Route</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Complaint history populated dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        // Fetch routes to populate the route dropdown
+        try {
+            const routeResponse = await fetch('/api/routes');
+            if (routeResponse.ok) {
+                const routes = await routeResponse.json();
+                const routeSelect = document.getElementById("route");
+                routes.forEach(route => {
+                    const option = document.createElement("option");
+                    option.value = route.id;
+                    option.textContent = route.name;
+                    routeSelect.appendChild(option);
+                });
+            } else {
+                document.getElementById("message").innerText = "Could not load routes.";
+            }
+        } catch (error) {
+            document.getElementById("message").innerText = "Error loading routes.";
+        }
+
+        // Fetch complaint history
+        try {
+            const complaintResponse = await fetch('/api/complaints');
+            if (complaintResponse.ok) {
+                const complaints = await complaintResponse.json();
+                const tableBody = document.getElementById("complaintHistoryTable").querySelector("tbody");
+                complaints.forEach(complaint => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${complaint.id}</td>
+                        <td>${complaint.route.name}</td>
+                        <td>${complaint.description}</td>
+                        <td>${complaint.status}</td>
+                        <td>${new Date(complaint.date).toLocaleString()}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                document.getElementById("message").innerText = "Could not load complaints history.";
+            }
+        } catch (error) {
+            document.getElementById("message").innerText = "Error loading complaints history.";
+        }
+    });
+
+    // Submit complaint
+    document.getElementById("submitComplaintButton").addEventListener("click", async function() {
+        const routeId = document.getElementById("route").value;
+        const description = document.getElementById("description").value;
+
+        const complaintData = { routeId, description };
+
+        try {
+            const response = await fetch('/api/complaints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(complaintData),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                document.getElementById("message").innerText = "Complaint submitted successfully!";
+                // Optionally refresh complaint history or reset form
+            } else {
+                document.getElementById("message").innerText = "Failed to submit complaint.";
+            }
+        } catch (error) {
+            document.getElementById("message").innerText = "Error submitting complaint.";
+        }
+    });
+</script>
+</body>
+</html>

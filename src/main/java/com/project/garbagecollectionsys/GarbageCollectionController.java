@@ -23,10 +23,12 @@ public class GarbageCollectionController {
     public String dashboard_driver() {
         return "dashboard_driver";
     }
-
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
     @GetMapping("/fragments/{page}")
     public String loadPage(@PathVariable String page) {
         return "fragments/" + page;
     }
-
 }
