@@ -1,19 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard - Garbage Collection</title>
     <link rel="stylesheet" href="/static/dashboard.css">
-    <script src="/static/jquery.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Updated to load jQuery from CDN -->
 </head>
 <body>
 <div class="dashboard-container">
     <div class="sidebar">
         <h2>Admin Panel</h2>
         <ul>
-            <li><a href="#" data-page="admin_overview.html" class="selected">Overview</a></li>
-            <li><a href="#" data-page="admin_users.html">Manage Users</a></li>
-            <li><a href="#" data-page="admin_reports.html">Reports</a></li>
+            <li><a href="#" data-page="admin_overview.html" class="selected"><span class="icon">🏠</span> Overview</a></li>
+            <li><a href="#" data-page="admin_users.html"><span class="icon">👥</span> Manage Users</a></li>
+            <li><a href="#" data-page="admin_drivers.html"><span class="icon">🚚</span> Manage Drivers</a></li>
+            <li><a href="#" data-page="admin_routes.html"><span class="icon">🛣️</span> Create Routes</a></li>
+            <li><a href="#" data-page="admin_schedules.html"><span class="icon">📅</span> Create Schedules</a></li>
+            <li><a href="#" data-page="admin_bulk_sms.html"><span class="icon">📤</span> Send Bulk SMS</a></li>
+            <li><a href="#" data-page="admin_reports.html"><span class="icon">📊</span> Reports</a></li>
+            <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
         </ul>
     </div>
 
@@ -33,6 +38,28 @@
             $(this).addClass('selected');
             const page = $(this).data('page');
             $('#content-area').load('/fragments/' + page);
+        });
+
+        // Logout handler
+        $('.logout').click(async function (event) {
+            event.preventDefault();
+            try {
+                const response = await fetch('/api/users/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    alert('Logout failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+                alert('An error occurred. Please try again.');
+            }
         });
     });
 </script>

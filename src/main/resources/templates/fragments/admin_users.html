@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users</title>
+    <link rel="stylesheet" href="/static/users.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="user-management-container">
+    <h2>Manage Users</h2>
+
+    <h3>Existing Users</h3>
+    <table id="usersTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- User rows will be populated here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Load existing users
+        loadUsers();
+    });
+
+    // Function to load users into the table
+    function loadUsers() {
+        $.ajax({
+            url: '/api/users/role/USER', // Adjust this URL to your API endpoint for fetching users with role USER
+            type: 'GET',
+            success: function (users) {
+                const tbody = $('#usersTable tbody');
+                tbody.empty(); // Clear existing rows
+                users.forEach(user => {
+                    const row = `<tr>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.address}</td>
+                    <td>
+                        <button onclick="editUser(${user.id})">Edit</button>
+                        <button onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                </tr>`;
+                    tbody.append(row);
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching users:', error);
+            }
+        });
+    }
+
+    // Function to delete a user
+    function deleteUser(id) {
+        $.ajax({
+            url: `/api/users/${id}`, // Adjust this URL to your API endpoint for deleting a user
+            type: 'DELETE',
+            success: function () {
+                alert('User deleted successfully!');
+                loadUsers(); // Refresh the user list
+            },
+            error: function (error) {
+                console.error('Error deleting user:', error);
+                alert('Failed to delete user. Please try again.');
+            }
+        });
+    }
+
+    // Function to edit a user (this can be expanded with a modal or form for editing)
+    function editUser(id) {
+        // Fetch the user details and pre-fill the form for editing
+        $.ajax({
+            url: `/api/users/${id}`, // Adjust this URL to your API endpoint for fetching a specific user
+            type: 'GET',
+            success: function (user) {
+                // Pre-fill the form with user details (you could implement a modal here)
+                const name = prompt("Edit User Name:", user.name);
+                const email = prompt("Edit User Email:", user.email);
+                const phone = prompt("Edit User Phone:", user.phone);
+                const address = prompt("Edit User Address:", user.address);
+
+                if (name && email && phone && address) {
+                    const updatedUser = {
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        address: address,
+                        role: user.role // Keep the same role
+                    };
+
+                    $.ajax({
+                        url: `/api/users/${id}`, // Adjust this URL to your API endpoint for updating a user
+                        type: 'PUT',
+                        contentType: 'application/json',
+                        data: JSON.stringify(updatedUser),
+                        success: function () {
+                            alert('User updated successfully!');
+                            loadUsers(); // Refresh the user list
+                        },
+                        error: function (error) {
+                            console.error('Error updating user:', error);
+                            alert('Failed to update user. Please try again.');
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                console.error('Error fetching user details:', error);
+            }
+        });
+    }
+</script>
+</body>
+</html>

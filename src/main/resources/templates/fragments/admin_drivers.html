@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Drivers</title>
+    <link rel="stylesheet" href="/static/drivers.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="driver-management-container">
+    <h2>Manage Drivers</h2>
+
+    <form id="driverForm">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label for="address">Address</label>
+            <input type="text" id="address" name="address" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <input type="hidden" id="role" name="role" value="DRIVER">
+
+        <button type="submit">Add Driver</button>
+    </form>
+
+    <h3>Existing Drivers</h3>
+    <table id="driversTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Driver rows will be populated here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Load existing drivers
+        loadDrivers();
+
+        // Handle form submission to add a new driver
+        $('#driverForm').on('submit', function (event) {
+            event.preventDefault();
+
+            const driverData = {
+                name: $('#name').val(),
+                email: $('#email').val(),
+                phone: $('#phone').val(),
+                address: $('#address').val(),
+                password: $('#password').val(),
+                role: 'DRIVER' // Ensure role is set to DRIVER
+            };
+
+            $.ajax({
+                url: '/api/users', // Adjust this URL to your API endpoint for adding users
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(driverData),
+                success: function () {
+                    alert('Driver added successfully!');
+                    loadDrivers(); // Refresh the driver list
+                    $('#driverForm')[0].reset(); // Reset the form
+                },
+                error: function (error) {
+                    console.error('Error adding driver:', error);
+                    alert('Failed to add driver. Please try again.');
+                }
+            });
+        });
+    });
+
+    // Function to load drivers into the table
+    function loadDrivers() {
+        $.ajax({
+            url: '/api/users/role/DRIVER', // Fetch users with the role DRIVER
+            type: 'GET',
+            success: function (drivers) {
+                const tbody = $('#driversTable tbody');
+                tbody.empty(); // Clear existing rows
+                drivers.forEach(driver => {
+                    const row = `<tr>
+                    <td>${driver.name}</td>
+                    <td>${driver.email}</td>
+                    <td>${driver.phone}</td>
+                    <td>${driver.address}</td>
+                    <td>
+                        <button onclick="editDriver(${driver.id})">Edit</button>
+                        <button onclick="deleteDriver(${driver.id})">Delete</button>
+                    </td>
+                </tr>`;
+                    tbody.append(row);
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching drivers:', error);
+            }
+        });
+    }
+
+    // Function to delete a driver
+    function deleteDriver(id) {
+        $.ajax({
+            url: `/api/users/${id}`, // Adjust this URL to your API endpoint for deleting a user
+            type: 'DELETE',
+            success: function () {
+                alert('Driver deleted successfully!');
+                loadDrivers(); // Refresh the driver list
+            },
+            error: function (error) {
+                console.error('Error deleting driver:', error);
+                alert('Failed to delete driver. Please try again.');
+            }
+        });
+    }
+
+    // Function to edit a driver (this can be expanded with a modal or form for editing)
+    function editDriver(id) {
+        // Implement the editing functionality as needed, e.g., pre-fill the form and send an update request
+        alert('Edit functionality not implemented yet.');
+    }
+</script>
+</body>
+</html>
