@@ -1,4 +1,79 @@
-<div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Overview</title>
+    <link rel="stylesheet" href="/static/overview.css">
+</head>
+<body>
+<div class="overview-container">
     <h3>Admin Overview</h3>
-    <p>Overview of the entire system, user statistics, etc.</p>
+
+    <div class="card-container">
+        <div class="card">
+            <h4>Total Users</h4>
+            <p id="total-users">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Total Drivers</h4>
+            <p id="total-drivers">0</p>
+        </div>
+
+        <div class="card">
+            <h4>Scheduled Routes</h4>
+            <p id="scheduled-routes">0</p>
+        </div>
+
+        <div class="card">
+            <h4>SMS Sent This Month</h4>
+            <p id="sms-sent">0</p>
+        </div>
+    </div>
+
+    <div class="recent-activities">
+        <h4>Recent Activities</h4>
+        <table>
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Activity</th>
+            </tr>
+            </thead>
+            <tbody id="recent-activities-table">
+            <!-- Activities will load here dynamically -->
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<script>
+    // Example JavaScript for dynamically updating the data on the overview screen
+    $(document).ready(function () {
+        // Fetch total counts and update cards (replace with actual AJAX requests)
+        $('#total-users').text('150');
+        $('#total-drivers').text('30');
+        $('#scheduled-routes').text('45');
+        $('#sms-sent').text('200');
+
+        // Sample recent activities data
+        const activities = [
+            { date: '2024-10-30', activity: 'New user registered' },
+            { date: '2024-10-29', activity: 'Route schedule updated' },
+            { date: '2024-10-28', activity: 'Bulk SMS sent' },
+        ];
+
+        // Populate the recent activities table
+        const activitiesTable = $('#recent-activities-table');
+        activities.forEach(activity => {
+            activitiesTable.append(`
+                <tr>
+                    <td>${activity.date}</td>
+                    <td>${activity.activity}</td>
+                </tr>
+            `);
+        });
+    });
+</script>
+</body>
+</html>

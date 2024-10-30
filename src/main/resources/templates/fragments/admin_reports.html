@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Reports</title>
+    <link rel="stylesheet" href="/static/reports.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="reports-container">
+    <h3>Admin Reports</h3>
+
+    <!-- Charts Section -->
+    <div class="chart-container">
+        <div class="chart-card">
+            <h4>User Distribution</h4>
+            <canvas id="userPieChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Monthly SMS Sent</h4>
+            <canvas id="smsBarChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Route Activity Trends</h4>
+            <canvas id="activityLineChart"></canvas>
+        </div>
+    </div>
+
+    <!-- PDF Generation Button -->
+    <button id="generate-pdf">Generate PDF Report</button>
+</div>
+
+<script>
+    // Initialize Charts with Chart.js
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pie Chart for User Distribution
+        const userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Admin', 'Drivers', 'Customers'],
+                datasets: [{
+                    data: [10, 30, 60], // Replace with actual data
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                }]
+            },
+            options: {
+                responsive: true,
+            }
+        });
+
+        // Bar Chart for Monthly SMS Sent
+        const smsBarChart = new Chart(document.getElementById('smsBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'SMS Sent',
+                    data: [500, 600, 700, 800, 500, 400, 700, 800, 900, 600, 500, 400], // Replace with actual data
+                    backgroundColor: '#36A2EB',
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Line Chart for Route Activity Trends
+        const activityLineChart = new Chart(document.getElementById('activityLineChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Route Activity',
+                    data: [200, 220, 180, 240], // Replace with actual data
+                    borderColor: '#FF6384',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+
+    // PDF Generation with jsPDF
+    document.getElementById('generate-pdf').addEventListener('click', function () {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        pdf.text('Admin Reports', 10, 10);
+        pdf.text('User Distribution:', 10, 20);
+        pdf.addImage(userPieChart.toBase64Image(), 'PNG', 10, 30, 80, 80);
+
+        pdf.text('Monthly SMS Sent:', 10, 120);
+        pdf.addImage(smsBarChart.toBase64Image(), 'PNG', 10, 130, 80, 80);
+
+        pdf.text('Route Activity Trends:', 10, 220);
+        pdf.addImage(activityLineChart.toBase64Image(), 'PNG', 10, 230, 80, 80);
+
+        pdf.save('Admin_Reports.pdf');
+    });
+</script>
+</body>
+</html>

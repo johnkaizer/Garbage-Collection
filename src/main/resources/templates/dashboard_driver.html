@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Driver Dashboard - Garbage Collection</title>
     <link rel="stylesheet" href="/static/dashboard.css">
-    <script src="/static/jquery.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Load jQuery from CDN -->
 </head>
 <body>
 <div class="dashboard-container">
     <div class="sidebar">
         <h2>Driver Panel</h2>
         <ul>
-            <li><a href="#" data-page="driver_route.html" class="selected">Assigned Route</a></li>
-            <li><a href="#" data-page="driver_schedule.html">Schedule</a></li>
-            <li><a href="#" data-page="driver_log.html">Log Collection</a></li>
+            <li><a href="#" data-page="driver_route.html" class="selected"><span class="icon">🚚</span> Assigned Route</a></li>
+            <li><a href="#" data-page="all_routes.html"><span class="icon">🛣️</span> Route Overview</a></li>
+            <li><a href="#" data-page="driver_schedule.html"><span class="icon">📅</span> Schedule</a></li>
+            <li><a href="#" data-page="driver_log.html"><span class="icon">📋</span> Log Collection</a></li>
+            <li><a href="#" data-page="driver_profile.html"><span class="icon">👤</span> Manage Profile</a></li>
+            <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
         </ul>
     </div>
 
@@ -33,6 +36,28 @@
             $(this).addClass('selected');
             const page = $(this).data('page');
             $('#content-area').load('/fragments/' + page);
+        });
+
+        // Logout handler
+        $('.logout').click(async function (event) {
+            event.preventDefault();
+            try {
+                const response = await fetch('/api/users/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    alert('Logout failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+                alert('An error occurred. Please try again.');
+            }
         });
     });
 </script>
