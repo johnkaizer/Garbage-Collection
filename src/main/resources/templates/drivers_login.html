@@ -27,7 +27,7 @@
 </head>
 <body>
 <div class="login-container">
-    <h2>Rongo Constituency Garbage Collection System</h2>
+    <h2>Rongo Constituency Garbage Collection System Drivers Portal</h2>
     <form id="loginForm">
         <div class="form-group">
             <label for="username">Username</label>
@@ -41,14 +41,6 @@
 
         <button type="submit" class="login-btn">Login</button>
     </form>
-    <p>Don't have an account? <a href="/register">Sign Up</a></p>
-
-    <!-- Button to Driver's Portal -->
-    <div class="driver-portal">
-        <button onclick="window.location.href='/dashboard_driver'" class="driver-btn">
-            Go to Driver's Portal
-        </button>
-    </div>
 </div>
 
 <script>
@@ -61,7 +53,7 @@
         };
 
         try {
-            const response = await fetch("/api/users/login", {
+            const response = await fetch("/api/drivers/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

@@ -1,61 +1,51 @@
 package com.project.garbagecollectionsys.route;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/routes")
 public class RouteController {
 
-    private final RouteService routeService;
-
     @Autowired
-    public RouteController(RouteService routeService) {
-        this.routeService = routeService;
-    }
-
-    // Get all routes
-    @GetMapping
-    public List<Route> getAllRoutes() {
-        return routeService.getAllRoutes();
-    }
-
-    // Get route by ID
-    @GetMapping("/{id}")
-    public Optional<Route> getRouteById(@PathVariable Long id) {
-        return routeService.getRouteById(id);
-    }
+    private RouteService routeService;
 
     // Create a new route
     @PostMapping
-    public Route createRoute(@RequestBody Route route) {
-        return routeService.createRoute(route);
+    public ResponseEntity<Route> addRoute(@RequestBody Route route) {
+        Route createdRoute = routeService.addRoute(route);
+        return ResponseEntity.ok(createdRoute);
     }
 
     // Update a route by ID
     @PutMapping("/{id}")
-    public Route updateRoute(@PathVariable Long id, @RequestBody Route route) {
-        return routeService.updateRoute(id, route);
+    public ResponseEntity<Route> updateRoute(@PathVariable Long id, @RequestBody Route updatedRoute) {
+        Route route = routeService.updateRoute(id, updatedRoute);
+        return ResponseEntity.ok(route);
     }
 
     // Delete a route by ID
     @DeleteMapping("/{id}")
-    public void deleteRoute(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRoute(@PathVariable Long id) {
         routeService.deleteRoute(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // Get routes by driver ID
-    @GetMapping("/driver/{driverId}")
-    public List<Route> getRoutesByDriverId(@PathVariable Long driverId) {
-        return routeService.getRoutesByDriverId(driverId);
+    // Get all routes
+    @GetMapping
+    public ResponseEntity<List<Route>> getAllRoutes() {
+        List<Route> routes = routeService.getAllRoutes();
+        return ResponseEntity.ok(routes);
     }
 
-    // Get routes by scheduled day
-    @GetMapping("/scheduled-day/{scheduledDay}")
-    public List<Route> getRoutesByScheduledDay(@PathVariable String scheduledDay) {
-        return routeService.getRoutesByScheduledDay(scheduledDay);
+    // Get a route by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Route> getRouteById(@PathVariable Long id) {
+        Route route = routeService.getRouteById(id);
+        return ResponseEntity.ok(route);
     }
 }
 

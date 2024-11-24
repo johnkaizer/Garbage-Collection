@@ -9,23 +9,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "complaints")
+@Table(name = "payments")
 @Data
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
+    private String phone;
     private BigDecimal amount;
-    private LocalDateTime paymentDate;
-
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus status;
-
-    private String method;
-
+    private LocalDateTime paymentDate;// now
+    private LocalDateTime expiryDate; // 30 day after payment day
+    private String paymentMethod;   //DROP DOWN MENU WITH AND CASH MPESA AND CARD COMING SOON
 }

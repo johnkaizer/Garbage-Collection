@@ -1,10 +1,12 @@
-package com.project.garbagecollectionsys.users;
-import org.springframework.beans.factory.annotation.Autowired;
+package com.project.garbagecollectionsys.drivers;
+
+import com.project.garbagecollectionsys.users.User;
+import com.project.garbagecollectionsys.users.UserController;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.HashMap;
@@ -13,57 +15,51 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 
 @RestController
-@RequestMapping("/api/users")
-public class UserController {
+@RequestMapping("/api/drivers")
+@RequiredArgsConstructor
+public class DriverController {
+    private final DriverService driverService;
 
-    @Autowired
-    private UserService userService;
-
-    // Create a new user
+    // Create or Add a new driver
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.ok(createdUser);
+    public ResponseEntity<Drivers> createDriver(@RequestBody Drivers driver) {
+        return ResponseEntity.ok(driverService.createDriver(driver));
     }
 
-    // Get all users
+    // Fetch all Drivers
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<Drivers>> getAllDrivers() {
+        return ResponseEntity.ok(driverService.getAllDrivers());
     }
 
-    // Get user by ID
+    // Search Drivers by name
+    @GetMapping("/search")
+    public ResponseEntity<List<Drivers>> searchDriversByName(@RequestParam String name) {
+        return ResponseEntity.ok(driverService.searchDriversByName(name));
+    }
+
+    // Get a driver by ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
+    public ResponseEntity<Drivers> getDriverById(@PathVariable Long id) {
+        return driverService.getDriverById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Get user by phone
-    @GetMapping("/phone/{phone}")
-    public ResponseEntity<User> getUserByPhone(@PathVariable String phone) {
-        return userService.getUserByPhone(phone)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Update user
+    // Edit or Update a driver
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+    public ResponseEntity<Drivers> updateDriver(@PathVariable Long id, @RequestBody Drivers updatedDriver) {
         try {
-            User user = userService.updateUser(id, updatedUser);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(driverService.updateDriver(id, updatedDriver));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // Delete user
+    // Delete a driver
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteDriver(@PathVariable Long id) {
+        driverService.deleteDriver(id);
         return ResponseEntity.noContent().build();
     }
     @PostMapping("/login")
@@ -72,14 +68,12 @@ public class UserController {
         String password = loginDetails.get("password");
 
         // Authenticate the user
-        User user = userService.authenticateUser(username, password);
-        if (user != null) {
+        Drivers drivers = driverService.authenticateUser(username, password);
+        if (drivers != null) {
             // Prepare response data
             Map<String, String> response = new HashMap<>();
-            if ("ADMIN".equals(user.getRole())) {
-                response.put("redirectUrl", "/dashboard_admin");
-            } else if ("USER".equals(user.getRole())) {
-                response.put("redirectUrl", "/dashboard_user");
+            if ("DRIVER".equals(drivers.getRole())) {
+                response.put("redirectUrl", "/dashboard_drivers");
             } else {
                 // Handle unknown roles if needed
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -88,8 +82,8 @@ public class UserController {
 
             // Save preferences (use preferences only if working with local storage like desktop apps)
             Preferences prefs = Preferences.userNodeForPackage(UserController.class);
-            prefs.putLong("loggedInUserId", user.getId());
-            prefs.put("loggedInUserRole", user.getRole());
+            prefs.putLong("loggedInUserId", drivers.getId());
+            prefs.put("loggedInUserRole", drivers.getRole());
 
             // Return response with the redirect URL
             return ResponseEntity.ok(response);
@@ -112,3 +106,4 @@ public class UserController {
     }
 
 }
+

@@ -1,4 +1,4 @@
-package com.project.garbagecollectionsys;
+package com.project.garbagecollectionsys.config;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +26,10 @@ public class GarbageCollectionController {
     @GetMapping("/register")
     public String register() {
         return "register";
+    }
+    @GetMapping("/drivers_login")
+    public String drivers_login() {
+        return "drivers_login";
     }
     @GetMapping("/fragments/{page}")
     public String loadPage(@PathVariable String page) {

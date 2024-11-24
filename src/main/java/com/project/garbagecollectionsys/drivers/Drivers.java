@@ -1,20 +1,20 @@
-package com.project.garbagecollectionsys.users;
+package com.project.garbagecollectionsys.drivers;
 
 import com.project.garbagecollectionsys.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "users")
+@Table(name = "Drivers")
 @Data
-public class User {
+public class Drivers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String username;
+    private String name;
     private String phone;
-    private String route; // this will be a dropdown menu
+    private String routeAssigned; // this will be a dropdown menu
     private String password;
-    private String role; // user
-
+    @Column(nullable = false)
+    private String role = "Driver";
 }

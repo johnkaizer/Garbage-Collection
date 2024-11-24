@@ -1,6 +1,5 @@
 package com.project.garbagecollectionsys.complaint;
 
-import com.project.garbagecollectionsys.enums.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -10,50 +9,47 @@ import java.util.Optional;
 @Service
 public class ComplaintService {
 
-    private final ComplaintRepository complaintRepository;
-
     @Autowired
-    public ComplaintService(ComplaintRepository complaintRepository) {
-        this.complaintRepository = complaintRepository;
-    }
+    private ComplaintRepository complaintRepository;
 
-    public List<Complaint> getAllComplaints() {
-        return complaintRepository.findAll();
-    }
-
-    public Optional<Complaint> getComplaintById(Long id) {
-        return complaintRepository.findById(id);
-    }
-
-    public Complaint createComplaint(Complaint complaint) {
-        complaint.setDate(LocalDateTime.now()); // Set the date to now when created
-        complaint.setStatus(Status.PENDING); // Default status to PENDING
+    // Add a new complaint
+    public Complaint addComplaint(Complaint complaint) {
+        complaint.setStatus("Pending");  // Default status is PENDING
+        complaint.setDate(LocalDateTime.now());  // Set the current date and time
         return complaintRepository.save(complaint);
     }
 
-    public Complaint updateComplaint(Long id, Complaint updatedComplaint) {
-        return complaintRepository.findById(id).map(complaint -> {
+    // Edit an existing complaint
+    public Complaint editComplaint(Long id, Complaint updatedComplaint) {
+        Optional<Complaint> existingComplaint = complaintRepository.findById(id);
+        if (existingComplaint.isPresent()) {
+            Complaint complaint = existingComplaint.get();
+            complaint.setPhone(updatedComplaint.getPhone());
+            complaint.setRoute(updatedComplaint.getRoute());
             complaint.setDescription(updatedComplaint.getDescription());
             complaint.setStatus(updatedComplaint.getStatus());
-            complaint.setRoute(updatedComplaint.getRoute());
             return complaintRepository.save(complaint);
-        }).orElseThrow(() -> new RuntimeException("Complaint not found"));
+        }
+        return null; // Complaint not found
     }
 
+    // Delete a complaint
     public void deleteComplaint(Long id) {
         complaintRepository.deleteById(id);
     }
 
-    public List<Complaint> getComplaintsByStatus(Status status) {
+    // Filter complaints by phone number
+    public List<Complaint> getComplaintsByPhone(String phone) {
+        return complaintRepository.findByPhone(phone);
+    }
+
+    // Filter complaints by status
+    public List<Complaint> getComplaintsByStatus(String status) {
         return complaintRepository.findByStatus(status);
     }
 
-    public List<Complaint> getComplaintsByUserId(Long userId) {
-        return complaintRepository.findByUserId(userId);
-    }
-
-    public List<Complaint> getComplaintsByRouteId(Long routeId) {
-        return complaintRepository.findByRouteId(routeId);
+    // Filter complaints by phone and status
+    public List<Complaint> getComplaintsByPhoneAndStatus(String phone, String status) {
+        return complaintRepository.findByPhoneAndStatus(phone, status);
     }
 }
-

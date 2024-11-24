@@ -5,6 +5,7 @@ import lombok.Data;
 import com.project.garbagecollectionsys.users.User;
 import com.project.garbagecollectionsys.route.Route;
 import com.project.garbagecollectionsys.enums.Status;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,20 +15,10 @@ public class Complaint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "route_id")
-    private Route route;
-
+    private String phone;
+    private String Route;  //DROP DOWN MENU IN THE UI
     private String description;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
+    private String status;
     private LocalDateTime date;
 
 }

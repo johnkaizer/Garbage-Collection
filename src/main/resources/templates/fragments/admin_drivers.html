@@ -2,147 +2,305 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Drivers</title>
-    <link rel="stylesheet" href="/static/drivers.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Management</title>
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #004d00; /* Deep green background */
+            color: #fff;
+        }
+
+        /* Top Menu */
+        .top-menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #006600; /* Slightly lighter green for the header */
+            padding: 10px 20px;
+        }
+
+        .top-menu h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .logout {
+            cursor: pointer;
+            font-size: 1.1em;
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .logout:hover {
+            color: #ff6666; /* Light red for hover */
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            background-color: #fff; /* White background for main content */
+            border-radius: 8px;
+            margin: 20px auto;
+            width: 90%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            color: #333; /* Dark text for contrast */
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #007700;
+            color: #fff;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007700;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #005500;
+        }
+
+        .btn-secondary {
+            background-color: #ff6666;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            border-radius: 10px;
+            width: 400px;
+            padding: 20px;
+            color: #333;
+        }
+
+        .modal-content h2 {
+            margin: 0 0 20px;
+        }
+
+        .modal-content .form-group {
+            margin-bottom: 15px;
+        }
+
+        .modal-content .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .modal-content .form-group select,
+        .modal-content .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
 </head>
 <body>
-<div class="driver-management-container">
-    <h2>Manage Drivers</h2>
+<div class="top-menu">
+    <h1>Admin Dashboard</h1>
+    <a class="logout" href="/dashboard_admin">Back</a>
+</div>
+<button class="btn" id="openAddDriverModal">Add Driver</button>
+<table id="driverTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Route Assigned</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="driverTableBody">
+    <!-- Populated dynamically -->
+    </tbody>
+</table>
 
-    <form id="driverForm">
+<!-- Add/Edit Modal -->
+<div class="modal" id="driverModal">
+    <div class="modal-content">
+        <h2 id="driverModalTitle">Add Driver</h2>
         <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required>
+            <label for="driverName">Name</label>
+            <input type="text" id="driverName" placeholder="Enter driver's name">
         </div>
-
         <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
+            <label for="driverPhone">Phone</label>
+            <input type="text" id="driverPhone" placeholder="Enter phone number">
         </div>
-
         <div class="form-group">
-            <label for="phone">Phone</label>
-            <input type="text" id="phone" name="phone" required>
+            <label for="driverRoute">Route Assigned Landmarks</label>
+            <select id="driverRoute">
+                <option value="Rongo University">Rongo University</option>
+                <option value="Kuja River">Kuja River</option>
+                <option value="Rongo Market">Rongo Market</option>
+                <option value="Kitere Hills">Kitere Hills</option>
+                <option value="Kanyawanga High School">Kanyawanga High School</option>
+                <option value="St. Magdalene Catholic Church">St. Magdalene Catholic Church</option>
+                <option value="Riosiri Town">Riosiri Town</option>
+                <option value="Kamwango Mines">Kamwango Mines</option>
+                <option value="Migori Tea Factory">Migori Tea Factory</option>
+                <option value="Rongo Sub-County Hospital">Rongo Sub-County Hospital</option>
+            </select>
         </div>
-
         <div class="form-group">
-            <label for="address">Address</label>
-            <input type="text" id="address" name="address" required>
+            <label for="driverPassword">Password</label>
+            <input type="password" id="driverPassword" placeholder="Enter password">
         </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+        <div class="modal-actions">
+            <button class="btn" id="saveDriver">Save</button>
+            <button class="btn btn-secondary" id="closeDriverModal">Cancel</button>
         </div>
-
-        <input type="hidden" id="role" name="role" value="DRIVER">
-
-        <button type="submit">Add Driver</button>
-    </form>
-
-    <h3>Existing Drivers</h3>
-    <table id="driversTable">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Driver rows will be populated here -->
-        </tbody>
-    </table>
+    </div>
 </div>
 
 <script>
-    $(document).ready(function () {
-        // Load existing drivers
-        loadDrivers();
+    const driverModal = document.getElementById('driverModal');
+    const openAddDriverModal = document.getElementById('openAddDriverModal');
+    const closeDriverModal = document.getElementById('closeDriverModal');
+    const saveDriver = document.getElementById('saveDriver');
+    const driverModalTitle = document.getElementById('driverModalTitle');
+    const driverTableBody = document.getElementById('driverTableBody');
 
-        // Handle form submission to add a new driver
-        $('#driverForm').on('submit', function (event) {
-            event.preventDefault();
+    let editingDriverId = null;
 
-            const driverData = {
-                name: $('#name').val(),
-                email: $('#email').val(),
-                phone: $('#phone').val(),
-                address: $('#address').val(),
-                password: $('#password').val(),
-                role: 'DRIVER' // Ensure role is set to DRIVER
-            };
-
-            $.ajax({
-                url: '/api/users', // Adjust this URL to your API endpoint for adding users
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(driverData),
-                success: function () {
-                    alert('Driver added successfully!');
-                    loadDrivers(); // Refresh the driver list
-                    $('#driverForm')[0].reset(); // Reset the form
-                },
-                error: function (error) {
-                    console.error('Error adding driver:', error);
-                    alert('Failed to add driver. Please try again.');
-                }
-            });
-        });
+    // Open modal for adding driver
+    openAddDriverModal.addEventListener('click', () => {
+        driverModalTitle.innerText = 'Add Driver';
+        clearModalFields();
+        driverModal.style.display = 'flex';
+        editingDriverId = null;
     });
 
-    // Function to load drivers into the table
-    function loadDrivers() {
-        $.ajax({
-            url: '/api/users/role/DRIVER', // Fetch users with the role DRIVER
-            type: 'GET',
-            success: function (drivers) {
-                const tbody = $('#driversTable tbody');
-                tbody.empty(); // Clear existing rows
-                drivers.forEach(driver => {
-                    const row = `<tr>
+    // Close modal
+    closeDriverModal.addEventListener('click', () => {
+        driverModal.style.display = 'none';
+    });
+
+    // Fetch and populate drivers
+    async function fetchDrivers() {
+        const response = await fetch('/api/drivers');
+        const drivers = await response.json();
+        driverTableBody.innerHTML = '';
+        drivers.forEach(driver => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${driver.id}</td>
                     <td>${driver.name}</td>
-                    <td>${driver.email}</td>
                     <td>${driver.phone}</td>
-                    <td>${driver.address}</td>
+                    <td>${driver.routeAssigned}</td>
                     <td>
-                        <button onclick="editDriver(${driver.id})">Edit</button>
-                        <button onclick="deleteDriver(${driver.id})">Delete</button>
+                        <button class="btn btn-small" onclick="editDriver(${driver.id})">Edit</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteDriver(${driver.id})">Delete</button>
                     </td>
-                </tr>`;
-                    tbody.append(row);
-                });
-            },
-            error: function (error) {
-                console.error('Error fetching drivers:', error);
-            }
+                `;
+            driverTableBody.appendChild(row);
         });
     }
 
-    // Function to delete a driver
-    function deleteDriver(id) {
-        $.ajax({
-            url: `/api/users/${id}`, // Adjust this URL to your API endpoint for deleting a user
-            type: 'DELETE',
-            success: function () {
-                alert('Driver deleted successfully!');
-                loadDrivers(); // Refresh the driver list
-            },
-            error: function (error) {
-                console.error('Error deleting driver:', error);
-                alert('Failed to delete driver. Please try again.');
-            }
-        });
+    // Clear modal fields
+    function clearModalFields() {
+        document.getElementById('driverName').value = '';
+        document.getElementById('driverPhone').value = '';
+        document.getElementById('driverRoute').value = '';
+        document.getElementById('driverPassword').value = '';
     }
 
-    // Function to edit a driver (this can be expanded with a modal or form for editing)
-    function editDriver(id) {
-        // Implement the editing functionality as needed, e.g., pre-fill the form and send an update request
-        alert('Edit functionality not implemented yet.');
+    // Save or update driver
+    saveDriver.addEventListener('click', async () => {
+        const driver = {
+            name: document.getElementById('driverName').value,
+            phone: document.getElementById('driverPhone').value,
+            routeAssigned: document.getElementById('driverRoute').value,
+            password: document.getElementById('driverPassword').value
+        };
+
+        if (editingDriverId) {
+            await fetch(`/api/drivers/${editingDriverId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(driver)
+            });
+            editingDriverId = null;
+        } else {
+            await fetch('/api/drivers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(driver)
+            });
+        }
+        fetchDrivers();
+        driverModal.style.display = 'none';
+    });
+
+    // Edit driver
+    async function editDriver(id) {
+        const response = await fetch(`/api/drivers/${id}`);
+        const driver = await response.json();
+
+        document.getElementById('driverName').value = driver.name;
+        document.getElementById('driverPhone').value = driver.phone;
+        document.getElementById('driverRoute').value = driver.routeAssigned;
+        driverModalTitle.innerText = 'Edit Driver';
+        driverModal.style.display = 'flex';
+        editingDriverId = id;
     }
+
+    // Delete driver
+    async function deleteDriver(id) {
+        await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
+        fetchDrivers();
+    }
+
+    // Initialize
+    fetchDrivers();
 </script>
 </body>
 </html>

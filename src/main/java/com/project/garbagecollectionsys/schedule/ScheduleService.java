@@ -34,7 +34,7 @@ public class ScheduleService {
     public Schedule updateSchedule(Long id, Schedule scheduleDetails) {
         return scheduleRepository.findById(id)
                 .map(schedule -> {
-                    schedule.setRoute(scheduleDetails.getRoute());
+                    schedule.setRouteId(scheduleDetails.getRouteId());
                     schedule.setDayOfWeek(scheduleDetails.getDayOfWeek());
                     schedule.setCollectionTime(scheduleDetails.getCollectionTime());
                     schedule.setFrequency(scheduleDetails.getFrequency());
