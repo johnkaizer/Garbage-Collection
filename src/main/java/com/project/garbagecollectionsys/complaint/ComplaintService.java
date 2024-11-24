@@ -52,4 +52,8 @@ public class ComplaintService {
     public List<Complaint> getComplaintsByPhoneAndStatus(String phone, String status) {
         return complaintRepository.findByPhoneAndStatus(phone, status);
     }
+
+    public List<Complaint> getAllComplaints() {
+        return complaintRepository.findAll();
+    }
 }

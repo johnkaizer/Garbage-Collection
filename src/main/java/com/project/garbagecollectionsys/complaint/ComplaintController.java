@@ -46,5 +46,10 @@ public class ComplaintController {
     public List<Complaint> getComplaintsByPhoneAndStatus(@RequestParam String phone, @RequestParam String status) {
         return complaintService.getComplaintsByPhoneAndStatus(phone, status);
     }
+    // Get all complaints
+    @GetMapping
+    public List<Complaint> getAllComplaints() {
+        return complaintService.getAllComplaints();
+    }
 }
 

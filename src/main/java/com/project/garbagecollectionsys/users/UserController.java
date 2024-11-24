@@ -108,7 +108,7 @@ public class UserController {
         prefs.remove("loggedInUserRole");
 
         // Redirect to login page
-        return new ModelAndView(new RedirectView("/login"));
+        return new ModelAndView(new RedirectView("/"));
     }
 
 }
