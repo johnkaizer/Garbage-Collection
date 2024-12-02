@@ -60,4 +60,8 @@ public class UserService {
             return null; // Authentication failed
         }
     }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

@@ -164,7 +164,7 @@
 </table>
 
 <!-- Add/Edit Modal -->
-<div class="modal" id="driverModal">
+<div class="modal" id="driverModal" style="display: none;">
     <div class="modal-content">
         <h2 id="driverModalTitle">Add Driver</h2>
         <div class="form-group">
@@ -173,26 +173,17 @@
         </div>
         <div class="form-group">
             <label for="driverPhone">Phone</label>
-            <input type="text" id="driverPhone" placeholder="Enter phone number">
+            <input type="text" id="driverPhone" placeholder="Enter driver's phone">
         </div>
         <div class="form-group">
-            <label for="driverRoute">Route Assigned Landmarks</label>
+            <label for="driverRoute">Route Assigned</label>
             <select id="driverRoute">
-                <option value="Rongo University">Rongo University</option>
-                <option value="Kuja River">Kuja River</option>
-                <option value="Rongo Market">Rongo Market</option>
-                <option value="Kitere Hills">Kitere Hills</option>
-                <option value="Kanyawanga High School">Kanyawanga High School</option>
-                <option value="St. Magdalene Catholic Church">St. Magdalene Catholic Church</option>
-                <option value="Riosiri Town">Riosiri Town</option>
-                <option value="Kamwango Mines">Kamwango Mines</option>
-                <option value="Migori Tea Factory">Migori Tea Factory</option>
-                <option value="Rongo Sub-County Hospital">Rongo Sub-County Hospital</option>
+                <!-- Options populated dynamically -->
             </select>
         </div>
         <div class="form-group">
             <label for="driverPassword">Password</label>
-            <input type="password" id="driverPassword" placeholder="Enter password">
+            <input type="password" id="driverPassword" placeholder="Enter driver's password">
         </div>
         <div class="modal-actions">
             <button class="btn" id="saveDriver">Save</button>
@@ -201,105 +192,120 @@
     </div>
 </div>
 
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const driverModal = document.getElementById('driverModal');
-    const openAddDriverModal = document.getElementById('openAddDriverModal');
-    const closeDriverModal = document.getElementById('closeDriverModal');
-    const saveDriver = document.getElementById('saveDriver');
-    const driverModalTitle = document.getElementById('driverModalTitle');
-    const driverTableBody = document.getElementById('driverTableBody');
+    const driverApiUrl = '/api/drivers';
+    const routeApiUrl = '/api/routes';
+    const driverModal = $('#driverModal');
+    const driverModalTitle = $('#driverModalTitle');
+    let editDriverMode = false;
+    let currentDriverId = null;
 
-    let editingDriverId = null;
-
-    // Open modal for adding driver
-    openAddDriverModal.addEventListener('click', () => {
-        driverModalTitle.innerText = 'Add Driver';
-        clearModalFields();
-        driverModal.style.display = 'flex';
-        editingDriverId = null;
-    });
-
-    // Close modal
-    closeDriverModal.addEventListener('click', () => {
-        driverModal.style.display = 'none';
-    });
-
-    // Fetch and populate drivers
-    async function fetchDrivers() {
-        const response = await fetch('/api/drivers');
-        const drivers = await response.json();
-        driverTableBody.innerHTML = '';
-        drivers.forEach(driver => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
+    // Fetch and populate driver table
+    function fetchDrivers() {
+        $.get(driverApiUrl, function(drivers) {
+            const driverRows = drivers.map(driver => `
+                <tr>
                     <td>${driver.id}</td>
                     <td>${driver.name}</td>
                     <td>${driver.phone}</td>
                     <td>${driver.routeAssigned}</td>
                     <td>
-                        <button class="btn btn-small" onclick="editDriver(${driver.id})">Edit</button>
-                        <button class="btn btn-small btn-danger" onclick="deleteDriver(${driver.id})">Delete</button>
+                        <button class="btn btn-edit" data-id="${driver.id}" data-driver='${JSON.stringify(driver)}'>Edit</button>
+                        <button class="btn btn-delete" data-id="${driver.id}">Delete</button>
                     </td>
-                `;
-            driverTableBody.appendChild(row);
+                </tr>
+            `).join('');
+            $('#driverTableBody').html(driverRows);
+
+            // Attach event listeners
+            $('.btn-edit').on('click', openEditDriverModal);
+            $('.btn-delete').on('click', deleteDriver);
         });
     }
 
-    // Clear modal fields
-    function clearModalFields() {
-        document.getElementById('driverName').value = '';
-        document.getElementById('driverPhone').value = '';
-        document.getElementById('driverRoute').value = '';
-        document.getElementById('driverPassword').value = '';
+    // Fetch and populate routes in dropdown
+    function fetchRoutesForDropdown() {
+        $.get(routeApiUrl, function(routes) {
+            const routeOptions = routes.map(route => `
+                <option value="${route.routeName}">${route.routeName}</option>
+            `).join('');
+            $('#driverRoute').html(routeOptions);
+        });
     }
 
-    // Save or update driver
-    saveDriver.addEventListener('click', async () => {
-        const driver = {
-            name: document.getElementById('driverName').value,
-            phone: document.getElementById('driverPhone').value,
-            routeAssigned: document.getElementById('driverRoute').value,
-            password: document.getElementById('driverPassword').value
-        };
-
-        if (editingDriverId) {
-            await fetch(`/api/drivers/${editingDriverId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(driver)
-            });
-            editingDriverId = null;
-        } else {
-            await fetch('/api/drivers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(driver)
-            });
-        }
-        fetchDrivers();
-        driverModal.style.display = 'none';
+    // Open add driver modal
+    $('#openAddDriverModal').on('click', function() {
+        driverModalTitle.text('Add Driver');
+        editDriverMode = false;
+        currentDriverId = null;
+        resetDriverModalFields();
+        fetchRoutesForDropdown();
+        driverModal.show();
     });
 
-    // Edit driver
-    async function editDriver(id) {
-        const response = await fetch(`/api/drivers/${id}`);
-        const driver = await response.json();
+    // Open edit driver modal
+    function openEditDriverModal() {
+        const driver = JSON.parse($(this).attr('data-driver'));
+        driverModalTitle.text('Edit Driver');
+        editDriverMode = true;
+        currentDriverId = driver.id;
 
-        document.getElementById('driverName').value = driver.name;
-        document.getElementById('driverPhone').value = driver.phone;
-        document.getElementById('driverRoute').value = driver.routeAssigned;
-        driverModalTitle.innerText = 'Edit Driver';
-        driverModal.style.display = 'flex';
-        editingDriverId = id;
+        $('#driverName').val(driver.name);
+        $('#driverPhone').val(driver.phone);
+        $('#driverPassword').val(driver.password);
+        fetchRoutesForDropdown();
+        $('#driverRoute').val(driver.routeAssigned);
+
+        driverModal.show();
     }
+
+    // Save driver
+    $('#saveDriver').on('click', function() {
+        const driverData = {
+            name: $('#driverName').val(),
+            phone: $('#driverPhone').val(),
+            routeAssigned: $('#driverRoute').val(),
+            password: $('#driverPassword').val(),
+        };
+
+        const request = editDriverMode
+            ? $.ajax({ url: `${driverApiUrl}/${currentDriverId}`, method: 'PUT', contentType: 'application/json', data: JSON.stringify(driverData) })
+            : $.ajax({ url: driverApiUrl, method: 'POST', contentType: 'application/json', data: JSON.stringify(driverData) });
+
+        request.done(function() {
+            driverModal.hide();
+            fetchDrivers();
+        }).fail(function() {
+            alert('Error saving driver.');
+        });
+    });
 
     // Delete driver
-    async function deleteDriver(id) {
-        await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
-        fetchDrivers();
+    function deleteDriver() {
+        const driverId = $(this).attr('data-id');
+        $.ajax({ url: `${driverApiUrl}/${driverId}`, method: 'DELETE' })
+            .done(fetchDrivers)
+            .fail(function() {
+                alert('Error deleting driver.');
+            });
     }
 
-    // Initialize
+    // Close modal
+    $('#closeDriverModal').on('click', function() {
+        driverModal.hide();
+    });
+
+    // Reset modal fields
+    function resetDriverModalFields() {
+        $('#driverName').val('');
+        $('#driverPhone').val('');
+        $('#driverPassword').val('');
+        $('#driverRoute').val('');
+    }
+
+    // Initial data fetch
     fetchDrivers();
 </script>
 </body>

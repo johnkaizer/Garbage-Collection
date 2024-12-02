@@ -1,5 +1,6 @@
 package com.project.garbagecollectionsys.drivers;
 
+import com.project.garbagecollectionsys.enums.Role;
 import com.project.garbagecollectionsys.users.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,9 @@ import java.util.Optional;
 public class DriverService {
     private final DriverRepository driverRepository;
 
-    // Create or Add a new driver
+    // Create or Add a new driver with role DRIVER by default
     public Drivers createDriver(Drivers driver) {
+        driver.setRole("DRIVER"); // Set default role
         return driverRepository.save(driver);
     }
 
@@ -49,9 +51,9 @@ public class DriverService {
         driverRepository.deleteById(id);
     }
 
-    public Drivers authenticateUser(String username, String password) {
+    public Drivers authenticateUser(String name, String password) {
         // Query the repository to find a user with the provided name
-        Drivers drivers = driverRepository.findByName(username);
+        Drivers drivers = driverRepository.findByName(name);
 
         // If user is found and password matches, return the user
         if (drivers != null && drivers.getPassword().equals(password)) {

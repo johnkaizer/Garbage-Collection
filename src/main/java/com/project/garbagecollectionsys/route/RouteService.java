@@ -50,5 +50,10 @@ public class RouteService {
         return routeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Route not found with ID: " + id));
     }
+
+    public Route getRouteByName(String routeName) {
+        return (Route) routeRepository.findByRouteName(routeName)
+                .orElseThrow(() -> new RuntimeException("Route not found with name: " + routeName));
+    }
 }
 

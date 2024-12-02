@@ -158,18 +158,9 @@
             <input type="text" id="phone" placeholder="Enter phone number">
         </div>
         <div class="form-group">
-            <label for="route">Route</label>
+            <label for="route">Route Landmark</label>
             <select id="route">
-                <option value="Rongo University">Rongo University</option>
-                <option value="Kuja River">Kuja River</option>
-                <option value="Rongo Market">Rongo Market</option>
-                <option value="Kitere Hills">Kitere Hills</option>
-                <option value="Kanyawanga High School">Kanyawanga High School</option>
-                <option value="St. Magdalene Catholic Church">St. Magdalene Catholic Church</option>
-                <option value="Riosiri Town">Riosiri Town</option>
-                <option value="Kamwango Mines">Kamwango Mines</option>
-                <option value="Migori Tea Factory">Migori Tea Factory</option>
-                <option value="Rongo Sub-County Hospital">Rongo Sub-County Hospital</option>
+                <!-- Routes will be dynamically populated -->
             </select>
         </div>
         <div class="form-group">
@@ -212,28 +203,40 @@
     </table>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     const apiUrl = '/api/complaints';
-    const complaintModal = document.getElementById('complaintModal');
-    const openAddModal = document.getElementById('openAddModal');
-    const closeModal = document.getElementById('closeModal');
-    const saveComplaint = document.getElementById('saveComplaint');
-    const modalTitle = document.getElementById('modalTitle');
-    const complaintTableBody = document.getElementById('complaintTableBody');
+    const userIdEndpoint = '/currentUserId';
+    const routesEndpoint = '/api/routes'; // Update with the actual endpoint for fetching routes
+    let currentUserId = null;
 
+    const complaintModal = $('#complaintModal');
+    const modalTitle = $('#modalTitle');
+    const complaintTableBody = $('#complaintTableBody');
     let editMode = false;
     let currentComplaintId = null;
 
+    // Fetch current user ID
+    const fetchCurrentUserId = () => {
+        return $.get(userIdEndpoint)
+            .done(data => {
+                currentUserId = data;
+            })
+            .fail(() => {
+                console.error('Failed to fetch current user ID');
+            });
+    };
+
     // Fetch all complaints and display in the table
-    const fetchComplaints = async () => {
-        const response = await fetch(apiUrl);
-        const complaints = await response.json();
-        populateComplaintTable(complaints);
+    const fetchComplaints = () => {
+        $.get(apiUrl, (complaints) => {
+            populateComplaintTable(complaints);
+        });
     };
 
     // Populate table with complaint data
     const populateComplaintTable = (complaints) => {
-        complaintTableBody.innerHTML = '';
+        complaintTableBody.empty();
         complaints.forEach(complaint => {
             const row = `
                 <tr>
@@ -249,104 +252,122 @@
                     </td>
                 </tr>
             `;
-            complaintTableBody.innerHTML += row;
+            complaintTableBody.append(row);
         });
 
         // Attach event listeners for edit and delete buttons
-        document.querySelectorAll('.btn-edit').forEach(button => {
-            button.addEventListener('click', (event) => openEditModal(event));
-        });
+        $('.btn-edit').click(openEditModal);
+        $('.btn-delete').click(deleteComplaint);
+    };
 
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', (event) => deleteComplaint(event));
+    // Fetch and populate routes
+    const fetchRoutes = () => {
+        $.get(routesEndpoint, (routes) => {
+            const routeSelect = $('#route');
+            routeSelect.empty();
+            routes.forEach(route => {
+                routeSelect.append(`<option value="${route}">${route}</option>`);
+            });
         });
     };
 
     // Open modal for adding a new complaint
-    openAddModal.addEventListener('click', () => {
-        modalTitle.innerText = 'Add Complaint';
+    $('#openAddModal').click(() => {
+        modalTitle.text('Add Complaint');
         editMode = false;
         currentComplaintId = null;
         resetModalFields();
-        complaintModal.style.display = 'flex';
+        complaintModal.show();
     });
 
     // Close modal
-    closeModal.addEventListener('click', () => {
-        complaintModal.style.display = 'none';
+    $('#closeModal').click(() => {
+        complaintModal.hide();
     });
 
     // Reset modal fields
     const resetModalFields = () => {
-        document.getElementById('phone').value = '';
-        document.getElementById('route').value = 'Rongo University';
-        document.getElementById('description').value = '';
-        document.getElementById('status').value = 'Pending';
+        $('#phone').val('');
+        $('#route').val('');
+        $('#description').val('');
+        $('#status').val('Pending');
     };
 
     // Open modal for editing an existing complaint
     const openEditModal = (event) => {
-        const complaint = JSON.parse(event.target.dataset.complaint);
-        modalTitle.innerText = 'Edit Complaint';
+        const complaint = JSON.parse($(event.target).data('complaint'));
+        modalTitle.text('Edit Complaint');
         editMode = true;
         currentComplaintId = complaint.id;
 
-        document.getElementById('phone').value = complaint.phone;
-        document.getElementById('route').value = complaint.route;
-        document.getElementById('description').value = complaint.description;
-        document.getElementById('status').value = complaint.status;
+        $('#phone').val(complaint.phone);
+        $('#route').val(complaint.route);
+        $('#description').val(complaint.description);
+        $('#status').val(complaint.status);
 
-        complaintModal.style.display = 'flex';
+        complaintModal.show();
     };
 
     // Save complaint (add or update)
-    saveComplaint.addEventListener('click', async () => {
-        const phone = document.getElementById('phone').value;
-        const route = document.getElementById('route').value;
-        const description = document.getElementById('description').value;
-        const status = document.getElementById('status').value;
+    $('#saveComplaint').click(() => {
+        const phone = $('#phone').val();
+        const route = $('#route').val();
+        const description = $('#description').val();
+        const status = $('#status').val();
 
-        const complaintData = { phone, route, description, status, date: new Date() };
+        const complaintData = {
+            phone,
+            route,
+            description,
+            status,
+            userId: currentUserId,
+            date: new Date()
+        };
 
-        try {
-            if (editMode) {
-                // Update complaint
-                await fetch(`${apiUrl}/${currentComplaintId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(complaintData),
-                });
-            } else {
-                // Add complaint
-                await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(complaintData),
-                });
+        const method = editMode ? 'PUT' : 'POST';
+        const url = editMode ? `${apiUrl}/${currentComplaintId}` : apiUrl;
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: 'application/json',
+            data: JSON.stringify(complaintData),
+            success: () => {
+                complaintModal.hide();
+                fetchComplaints();
+            },
+            error: (err) => {
+                console.error('Error saving complaint:', err);
             }
-
-            complaintModal.style.display = 'none';
-            fetchComplaints(); // Refresh table
-        } catch (error) {
-            console.error('Error saving complaint:', error);
-        }
+        });
     });
 
     // Delete a complaint
-    const deleteComplaint = async (event) => {
-        const complaintId = event.target.dataset.id;
+    const deleteComplaint = (event) => {
+        const complaintId = $(event.target).data('id');
 
-        try {
-            await fetch(`${apiUrl}/${complaintId}`, { method: 'DELETE' });
-            fetchComplaints(); // Refresh table
-        } catch (error) {
-            console.error('Error deleting complaint:', error);
-        }
+        $.ajax({
+            url: `${apiUrl}/${complaintId}`,
+            method: 'DELETE',
+            success: () => {
+                fetchComplaints();
+            },
+            error: (err) => {
+                console.error('Error deleting complaint:', err);
+            }
+        });
     };
 
-    // Initial fetch of complaints
-    fetchComplaints();
+    // Initialize the page
+    $(document).ready(() => {
+        fetchCurrentUserId().then(() => {
+            fetchRoutes();
+            fetchComplaints();
+        });
+    });
 </script>
 
 </body>
+
+
 </html>

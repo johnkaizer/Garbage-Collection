@@ -47,5 +47,11 @@ public class RouteController {
         Route route = routeService.getRouteById(id);
         return ResponseEntity.ok(route);
     }
+    // Get a route by routeName
+    @GetMapping("/by-name")
+    public ResponseEntity<Route> getRouteByName(@RequestParam String routeName) {
+        Route route = routeService.getRouteByName(routeName);
+        return ResponseEntity.ok(route);
+    }
 }
 

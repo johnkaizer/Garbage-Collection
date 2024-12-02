@@ -12,6 +12,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 @RestController
@@ -64,46 +65,58 @@ public class DriverController {
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginDetails) {
-        String username = loginDetails.get("username");
+        String name = loginDetails.get("name");
         String password = loginDetails.get("password");
 
         // Authenticate the user
-        Drivers drivers = driverService.authenticateUser(username, password);
+        Drivers drivers = driverService.authenticateUser(name, password);
         if (drivers != null) {
             // Prepare response data
             Map<String, String> response = new HashMap<>();
             if ("DRIVER".equals(drivers.getRole())) {
-                response.put("redirectUrl", "/dashboard_drivers");
+                response.put("redirectUrl", "/dashboard_driver");
             } else {
-                // Handle unknown roles if needed
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Access denied: Unknown role");
+                response.put("redirectUrl", "/drivers_login");
             }
 
             // Save preferences (use preferences only if working with local storage like desktop apps)
-            Preferences prefs = Preferences.userNodeForPackage(UserController.class);
-            prefs.putLong("loggedInUserId", drivers.getId());
-            prefs.put("loggedInUserRole", drivers.getRole());
+            Preferences prefs = Preferences.userNodeForPackage(DriverController.class);
+            prefs.putLong("loggedInDriverId", drivers.getId());
+            prefs.put("loggedInUserRole", String.valueOf(drivers.getRole()));
 
             // Return response with the redirect URL
             return ResponseEntity.ok(response);
         } else {
             // Invalid credentials; return an error response
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid username or password");
+                    .body("Invalid name or password");
         }
     }
     @PostMapping("/logout")
     public ModelAndView logout() {
         // Clear stored preferences
         Preferences prefs = Preferences.userNodeForPackage(UserController.class);
-        prefs.remove("loggedInUserId");
-        prefs.remove("loggedInUsername");
+        prefs.remove("loggedInDriverId");
+        prefs.remove("loggedInName");
         prefs.remove("loggedInUserRole");
 
         // Redirect to login page
         return new ModelAndView(new RedirectView("/"));
     }
+    // GET: Get current logged-in driver details
+    @GetMapping("/current")
+    public ResponseEntity<Optional<Drivers>> getCurrentDriver() {
+        Preferences prefs = Preferences.userNodeForPackage(DriverController.class);
+        String loggedInDriverId = prefs.get("loggedInDriverId", null);
+        if (loggedInDriverId != null) {
+            Optional<Drivers> drivers = driverService.getDriverById(Long.valueOf(loggedInDriverId));
+            if (drivers != null) {
+                return new ResponseEntity<>(drivers, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
 
 }
 

@@ -15,6 +15,7 @@ public class Complaint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String userId;
     private String phone;
     private String Route;  //DROP DOWN MENU IN THE UI
     private String description;

@@ -99,6 +99,30 @@ public class UserController {
                     .body("Invalid username or password");
         }
     }
+
+    // GET: Get current logged-in user details
+    @GetMapping("/current")
+    public ResponseEntity<User> getCurrentUser() {
+        Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+        String loggedInUsername = prefs.get("loggedInUsername", null);
+        if (loggedInUsername != null) {
+            User user = userService.getUserByUsername(loggedInUsername);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    @GetMapping("/currentUserId")
+    public ResponseEntity<Long> getCurrentUserId() {
+        Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+        Long loggedInUserId = prefs.getLong("loggedInUserId", -1L);
+        if (loggedInUserId != -1L) {
+            return new ResponseEntity<>(loggedInUserId, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
     @PostMapping("/logout")
     public ModelAndView logout() {
         // Clear stored preferences

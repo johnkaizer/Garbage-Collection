@@ -121,18 +121,10 @@
         <label for="phone">Phone No</label>
         <input type="tel" id="phone" name="phone" required>
 
-        <label for="route">Route Landmark</label>
-        <select id="route">
-            <option value="Rongo University">Rongo University</option>
-            <option value="Kuja River">Kuja River</option>
-            <option value="Rongo Market">Rongo Market</option>
-            <option value="Kitere Hills">Kitere Hills</option>
-            <option value="Kanyawanga High School">Kanyawanga High School</option>
-            <option value="St. Magdalene Catholic Church">St. Magdalene Catholic Church</option>
-            <option value="Riosiri Town">Riosiri Town</option>
-            <option value="Kamwango Mines">Kamwango Mines</option>
-            <option value="Migori Tea Factory">Migori Tea Factory</option>
-            <option value="Rongo Sub-County Hospital">Rongo Sub-County Hospital</option>
+        <label for="route">Route</label>
+        <select id="route" name="route" required>
+            <!-- Routes will be dynamically populated -->
+            <option value="" disabled selected>Select a route</option>
         </select>
 
         <label for="password">Password</label>
@@ -157,13 +149,38 @@
 </div>
 
 <script>
-    document.getElementById("registerForm").addEventListener("submit", async function(event) {
+    document.addEventListener("DOMContentLoaded", async function () {
+        const routeDropdown = document.getElementById("route");
+
+        // Fetch routes from the API
+        try {
+            const response = await fetch("/api/routes");
+            if (!response.ok) {
+                throw new Error("Failed to fetch routes.");
+            }
+            const routes = await response.json();
+
+            // Populate dropdown with routes (displaying both name and landmarks)
+            routeDropdown.innerHTML += routes
+                .map(route =>
+                    `<option value="${route.routeName}">
+                        ${route.routeName} - (${route.landmarks})
+                    </option>`)
+                .join("");
+        } catch (error) {
+            console.error("Error fetching routes:", error);
+            showMessage("Unable to load routes. Please try again later.");
+        }
+    });
+
+    // Handle form submission
+    document.getElementById("registerForm").addEventListener("submit", async function (event) {
         event.preventDefault();
 
         const formData = {
             username: document.getElementById("username").value,
             phone: document.getElementById("phone").value,
-            route: document.getElementById("route").value,
+            route: document.getElementById("route").value, // Only `routeName` is sent
             password: document.getElementById("password").value,
             role: document.getElementById("role").value
         };
@@ -182,7 +199,7 @@
                 clearForm();
                 setTimeout(() => {
                     window.location.href = "/";
-                }, 1000); // Redirect after 2 seconds
+                }, 2000); // Redirect after 2 seconds
             } else {
                 const errorData = await response.json();
                 showMessage("Registration failed: " + (errorData.message || "Please try again."));
@@ -193,7 +210,7 @@
     });
 
     function clearForm() {
-        document.getElementById("registerForm").reset(); // Clears all form fields
+        document.getElementById("registerForm").reset();
     }
 
     function showMessage(message) {
@@ -205,6 +222,5 @@
         document.getElementById("messageModal").style.display = "none";
     }
 </script>
-
 </body>
 </html>

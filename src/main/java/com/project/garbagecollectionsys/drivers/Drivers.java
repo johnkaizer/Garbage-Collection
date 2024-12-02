@@ -15,6 +15,5 @@ public class Drivers {
     private String phone;
     private String routeAssigned; // this will be a dropdown menu
     private String password;
-    @Column(nullable = false)
-    private String role = "Driver";
+    private String role;
 }
