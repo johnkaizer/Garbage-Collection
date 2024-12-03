@@ -1,4 +1,6 @@
 package com.project.garbagecollectionsys.users;
+import com.project.garbagecollectionsys.route.Route;
+import com.project.garbagecollectionsys.route.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 @RestController
@@ -18,6 +21,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RouteService routeService;
 
     // Create a new user
     @PostMapping
@@ -100,15 +106,19 @@ public class UserController {
         }
     }
 
-    // GET: Get current logged-in user details
+    // Get current logged-in user details and route details
     @GetMapping("/current")
-    public ResponseEntity<User> getCurrentUser() {
+    public ResponseEntity<Map<String, Object>> getCurrentUserWithRouteDetails() {
         Preferences prefs = Preferences.userNodeForPackage(UserController.class);
-        String loggedInUsername = prefs.get("loggedInUsername", null);
-        if (loggedInUsername != null) {
-            User user = userService.getUserByUsername(loggedInUsername);
+        String loggedInUserId = prefs.get("loggedInUserId", null);
+        if (loggedInUserId != null) {
+            Optional<User> user = userService.getUserById(Long.valueOf(loggedInUserId));
             if (user != null) {
-                return new ResponseEntity<>(user, HttpStatus.OK);
+                Route route = routeService.getRouteByName(user.get().getRoute());
+                Map<String, Object> response = new HashMap<>();
+                response.put("user", user);
+                response.put("route", route);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -118,11 +128,14 @@ public class UserController {
         Preferences prefs = Preferences.userNodeForPackage(UserController.class);
         Long loggedInUserId = prefs.getLong("loggedInUserId", -1L);
         if (loggedInUserId != -1L) {
+            System.out.println("Logged in User ID: " + loggedInUserId); // Debug log
             return new ResponseEntity<>(loggedInUserId, HttpStatus.OK);
         } else {
+            System.out.println("No User ID found in preferences."); // Debug log
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
     @PostMapping("/logout")
     public ModelAndView logout() {
         // Clear stored preferences

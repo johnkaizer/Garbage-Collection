@@ -16,8 +16,9 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String phone;
-    private BigDecimal amount;
+    private Long userId; //get the id of the current logged in user
+    private BigDecimal amount; // SUBSCRIPTION DROP DOWN MENU
     private LocalDateTime paymentDate;// now
-    private LocalDateTime expiryDate; // 30 day after payment day
+    private LocalDateTime expiryDate; // AS PER THE SELECTED SUBSCRIPTION day after payment day
     private String paymentMethod;   //DROP DOWN MENU WITH AND CASH MPESA AND CARD COMING SOON
 }

@@ -155,9 +155,9 @@
         <thead>
         <tr>
             <th>Name</th>
-            <th>Email</th>
+            <th>Route</th>
             <th>Phone</th>
-            <th>Address</th>
+            <th>role</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -176,22 +176,26 @@
     // Function to load users into the table
     function loadUsers() {
         $.ajax({
-            url: '/api/users', // Admin endpoint to fetch all users
+            url: '/api/users', // Fetch all users
             type: 'GET',
             success: function (users) {
                 const tbody = $('#usersTable tbody');
                 tbody.empty(); // Clear existing rows
-                users.forEach(user => {
+
+                // Filter users with role "USER"
+                const filteredUsers = users.filter(user => user.role === "USER");
+
+                filteredUsers.forEach(user => {
                     const row = `<tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.phone}</td>
-                        <td>${user.address}</td>
-                        <td>
-                            <button class="btn" onclick="editUser(${user.id})">Edit</button>
-                            <button class="btn btn-secondary" onclick="deleteUser(${user.id})">Delete</button>
-                        </td>
-                    </tr>`;
+                    <td>${user.username}</td>
+                    <td>${user.route}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button class="btn" onclick="editUser(${user.id})">Edit</button>
+                        <button class="btn btn-secondary" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                </tr>`;
                     tbody.append(row);
                 });
             },

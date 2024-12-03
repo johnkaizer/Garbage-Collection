@@ -72,6 +72,8 @@
             background-color: #f9f9f9;
         }
     </style>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <div class="top-menu">
@@ -80,7 +82,7 @@
 </div>
 
 <div class="main-content">
-    <h2>All Routes</h2>
+    <h2>My Route</h2>
     <table id="routesTable">
         <thead>
         <tr>
@@ -97,32 +99,36 @@
 </div>
 
 <script>
-    // Fetch routes from the API and populate the table
-    async function fetchRoutes() {
-        try {
-            const response = await fetch('/api/routes');
-            const routes = await response.json();
+    $(document).ready(function () {
+        // Fetch details of the currently logged-in user
+        $.ajax({
+            url: 'http://localhost:8080/api/users/current', // Endpoint to get current user details
+            method: 'GET',
+            success: function (data) {
+                const user = data.user; // User details
+                const route = data.route; // Route details
 
-            const tableBody = document.querySelector('#routesTable tbody');
-            tableBody.innerHTML = ''; // Clear any existing rows
-
-            routes.forEach(route => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                        <td>${route.id}</td>
-                        <td>${route.routeName}</td>
-                        <td>${route.landmarks}</td>
-                        <td>${route.scheduledDay}</td>
+                if (route) {
+                    // Populate the route details in the table
+                    const tableRow = `
+                        <tr>
+                            <td>${route.id}</td>
+                            <td>${route.routeName}</td>
+                            <td>${route.landmarks}</td>
+                            <td>${route.scheduledDay}</td>
+                        </tr>
                     `;
-                tableBody.appendChild(row);
-            });
-        } catch (error) {
-            console.error('Error fetching routes:', error);
-        }
-    }
 
-    // Call the function on page load
-    document.addEventListener('DOMContentLoaded', fetchRoutes);
+                    $('#routesTable tbody').append(tableRow);
+                } else {
+                    console.error('No route details available for the user.');
+                }
+            },
+            error: function (error) {
+                console.error('Error fetching user or route details:', error);
+            }
+        });
+    });
 </script>
 </body>
 </html>

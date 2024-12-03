@@ -179,9 +179,18 @@
             <input type="text" id="phone">
         </div>
         <div class="form-group">
-            <label for="amount">Amount</label>
-            <input type="number" id="amount" step="0.01">
+            <label for="subscriptionType">Subscription Type</label>
+            <select id="subscriptionType" onchange="updateAmountAndExpiry()">
+                <option value="WEEKLY" data-days="7" data-amount="200">Weekly - KSH 200</option>
+                <option value="MONTHLY" data-days="30" data-amount="500">Monthly - KSH 500</option>
+                <option value="YEARLY" data-days="360" data-amount="4000">Yearly - KSH 4000</option>
+            </select>
         </div>
+        <div class="form-group">
+            <label for="amount">Amount</label>
+            <input type="text" id="amount" readonly>
+        </div>
+
         <div class="form-group">
             <label for="paymentMethod">Payment Method</label>
             <select id="paymentMethod">
@@ -209,22 +218,63 @@
         modal.style.display = 'none';
     }
 
+    function updateAmountAndExpiry() {
+        const subscriptionDropdown = document.getElementById('subscriptionType');
+        const selectedOption = subscriptionDropdown.options[subscriptionDropdown.selectedIndex];
+        const amount = selectedOption.getAttribute('data-amount');
+
+        // Update the amount field
+        document.getElementById('amount').value = amount;
+    }
+
+    async function fetchUserId() {
+        try {
+            const response = await fetch('/api/users/currentUserId');
+            if (response.ok) {
+                const userId = await response.json();
+                console.log('Fetched User ID:', userId); // Debug log
+                return userId;
+            } else {
+                console.error('Failed to fetch User ID:', response.status);
+                alert('Error fetching user ID');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching user ID:', error);
+            return null;
+        }
+    }
+
+
     async function submitPayment() {
         const phone = document.getElementById('phone').value;
-        const amount = document.getElementById('amount').value;
+        const subscriptionDropdown = document.getElementById('subscriptionType');
+        const selectedOption = subscriptionDropdown.options[subscriptionDropdown.selectedIndex];
+        const subscriptionType = selectedOption.value;
         const paymentMethod = document.getElementById('paymentMethod').value;
 
-        const payment = {
+        // Fetch the user ID
+        const userId = await fetchUserId();
+
+        if (!userId) {
+            alert('Cannot create payment without user ID.');
+            return;
+        }
+
+        const paymentRequest = {
             phone,
-            amount,
+            subscriptionType,
             paymentMethod,
+            userId // Add the user ID to the request
         };
 
+        console.log('Payment Request:', paymentRequest); // Debug log
+
         try {
-            const response = await fetch('/api/payments', {
+            const response = await fetch('/api/payments/payments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payment),
+                body: JSON.stringify(paymentRequest),
             });
 
             if (response.ok) {
@@ -232,17 +282,25 @@
                 closeModal();
                 fetchPayments();
             } else {
+                console.error('Error creating payment:', response.status);
                 alert('Error creating payment');
             }
         } catch (error) {
-            console.error(error);
+            console.error('Error creating payment:', error);
             alert('Error creating payment');
         }
     }
 
     async function fetchPayments() {
+        const userId = await fetchUserId();
+
+        if (!userId) {
+            alert('Cannot fetch payments without user ID.');
+            return;
+        }
+
         try {
-            const response = await fetch('/api/payments');
+            const response = await fetch(`/api/payments/payments?userId=${userId}`);
             const payments = await response.json();
 
             paymentTable.innerHTML = '';
@@ -252,23 +310,24 @@
                     expiryDate > new Date() ? 'Active' : 'Expired';
 
                 const row = `
-                        <tr>
-                            <td>${payment.id}</td>
-                            <td>${payment.phone}</td>
-                            <td>${payment.amount}</td>
-                            <td>${new Date(payment.paymentDate).toLocaleDateString()}</td>
-                            <td>${expiryDate.toLocaleDateString()}</td>
-                            <td>${payment.paymentMethod}</td>
-                            <td>${status}</td>
-                        </tr>
-                    `;
+                <tr>
+                    <td>${payment.id}</td>
+                    <td>${payment.phone}</td>
+                    <td>${payment.amount}</td>
+                    <td>${new Date(payment.paymentDate).toLocaleDateString()}</td>
+                    <td>${expiryDate.toLocaleDateString()}</td>
+                    <td>${payment.paymentMethod}</td>
+                    <td>${status}</td>
+                </tr>
+            `;
                 paymentTable.innerHTML += row;
             });
         } catch (error) {
-            console.error(error);
+            console.error('Error fetching payments:', error);
             alert('Error fetching payments');
         }
     }
+
 
     // Fetch payments on page load
     fetchPayments();

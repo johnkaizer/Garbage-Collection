@@ -6,23 +6,99 @@
     <title>Login - Garbage Collection System</title>
     <link rel="stylesheet" href="/static/login.css">
     <style>
+        /* General page styling */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #4CAF50; /* Green background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Centered login card */
+        .login-container {
+            background-color: white; /* White card */
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Form elements styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        /* Login button styling */
+        .login-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Sign up link styling */
+        p {
+            margin: 15px 0;
+        }
+
+        p a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        p a:hover {
+            text-decoration: underline;
+        }
+
+        /* Driver's portal button styling */
         .driver-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 20px;
-            text-align: center;
-            display: block;
-            margin: 20px auto;
-            cursor: pointer;
+            padding: 12px;
+            width: 100%;
             font-size: 16px;
             border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
         }
 
         .driver-btn:hover {
             background-color: #45a049;
         }
-
     </style>
 </head>
 <body>
@@ -43,7 +119,6 @@
     </form>
     <p>Don't have an account? <a href="/register">Sign Up</a></p>
 
-    <!-- Button to Driver's Portal -->
     <div class="driver-portal">
         <button onclick="window.location.href='/drivers_login'" class="driver-btn">
             Go to Driver's Portal

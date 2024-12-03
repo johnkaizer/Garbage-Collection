@@ -1,6 +1,7 @@
 package com.project.garbagecollectionsys.complaint;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -46,8 +47,13 @@ public class ComplaintController {
     public List<Complaint> getComplaintsByPhoneAndStatus(@RequestParam String phone, @RequestParam String status) {
         return complaintService.getComplaintsByPhoneAndStatus(phone, status);
     }
-    // Get all complaints
     @GetMapping
+    public ResponseEntity<List<Complaint>> getComplaints(@RequestParam String userId) {
+        List<Complaint> complaints = complaintService.getComplaintsByUserId(userId);
+        return ResponseEntity.ok(complaints);
+    }
+    // Get all complaints
+    @GetMapping("/all")
     public List<Complaint> getAllComplaints() {
         return complaintService.getAllComplaints();
     }

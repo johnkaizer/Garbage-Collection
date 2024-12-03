@@ -9,4 +9,6 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByPhone(String phone);
     List<Complaint> findByStatus(String status);
     List<Complaint> findByPhoneAndStatus(String phone, String status);
+
+    List<Complaint> findByUserId(String userId);
 }

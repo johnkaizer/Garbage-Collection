@@ -160,21 +160,6 @@
             <input type="text" id="phone" placeholder="Enter phone number">
         </div>
         <div class="form-group">
-            <label for="route">Route</label>
-            <select id="route">
-                <option value="Rongo University">Rongo University</option>
-                <option value="Kuja River">Kuja River</option>
-                <option value="Rongo Market">Rongo Market</option>
-                <option value="Kitere Hills">Kitere Hills</option>
-                <option value="Kanyawanga High School">Kanyawanga High School</option>
-                <option value="St. Magdalene Catholic Church">St. Magdalene Catholic Church</option>
-                <option value="Riosiri Town">Riosiri Town</option>
-                <option value="Kamwango Mines">Kamwango Mines</option>
-                <option value="Migori Tea Factory">Migori Tea Factory</option>
-                <option value="Rongo Sub-County Hospital">Rongo Sub-County Hospital</option>
-            </select>
-        </div>
-        <div class="form-group">
             <label for="description">Description</label>
             <textarea id="description" placeholder="Enter complaint description"></textarea>
         </div>
@@ -195,7 +180,6 @@
 
 <!-- Table for Complaints Management -->
 <div class="main-content">
-    <button class="btn" id="openAddModal">Add Complaint</button>
     <table>
         <thead>
         <tr>
@@ -226,12 +210,17 @@
     let editMode = false;
     let currentComplaintId = null;
 
-    // Fetch all complaints and display in the table
     const fetchComplaints = async () => {
-        const response = await fetch(apiUrl);
-        const complaints = await response.json();
-        populateComplaintTable(complaints);
+        const apiUrlForComplaints = `${apiUrl}/all`;
+        try {
+            const response = await fetch(apiUrlForComplaints);
+            const complaints = await response.json();
+            populateComplaintTable(complaints);
+        } catch (error) {
+            console.error('Error fetching complaints:', error);
+        }
     };
+
 
     // Populate table with complaint data
     const populateComplaintTable = (complaints) => {
@@ -294,7 +283,6 @@
         currentComplaintId = complaint.id;
 
         document.getElementById('phone').value = complaint.phone;
-        document.getElementById('route').value = complaint.route;
         document.getElementById('description').value = complaint.description;
         document.getElementById('status').value = complaint.status;
 

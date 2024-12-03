@@ -56,4 +56,8 @@ public class ComplaintService {
     public List<Complaint> getAllComplaints() {
         return complaintRepository.findAll();
     }
+
+    public List<Complaint> getComplaintsByUserId(String userId) {
+        return complaintRepository.findByUserId(userId);
+    }
 }

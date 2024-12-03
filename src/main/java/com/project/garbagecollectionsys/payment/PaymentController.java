@@ -1,5 +1,6 @@
 package com.project.garbagecollectionsys.payment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +13,21 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping
-    public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
-        Payment createdPayment = paymentService.createPayment(payment);
-        return ResponseEntity.ok(createdPayment);
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @PostMapping("/payments")
+    public ResponseEntity<Payment> createPayment(@RequestBody PaymentRequest paymentRequest) {
+        Payment payment = new Payment();
+        payment.setPhone(paymentRequest.getPhone());
+        payment.setAmount(paymentRequest.getAmount());
+        payment.setPaymentMethod(paymentRequest.getPaymentMethod());
+        payment.setUserId(paymentRequest.getUserId());
+
+        Payment savedPayment = paymentService.createPayment(payment, paymentRequest.getSubscriptionType());
+        return new ResponseEntity<>(savedPayment, HttpStatus.CREATED);
     }
+
 
     @GetMapping
     public ResponseEntity<List<Payment>> getAllPayments() {
@@ -30,5 +41,11 @@ public class PaymentController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/payments")
+    public ResponseEntity<List<Payment>> getPayments(@RequestParam Long userId) {
+        List<Payment> payments = paymentRepository.findByUserId(userId);
+        return ResponseEntity.ok(payments);
+    }
+
 }
 
